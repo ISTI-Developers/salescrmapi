@@ -137,8 +137,12 @@ try {
 
                 }
                 $uploadFile = isset($_FILES['file']) ? "attachments/$newFileName" : null;
+                $date = new DateTimeImmutable($_POST['date']);
+                $dateYear = ((int) $date->format('m') === 12) ? 2025 : 2026;
+                $newDate = $date->setDate($dateYear, (int) $date->format('m'), (int) $date->format('d'));
+                $dateSubmitted = $newDate->format('Y-m-d\TH:i:s.v\Z');
 
-                $result = $reports_controller->insert_report($_POST['client_id'], $_POST['report'], $_POST['user_id'], $_POST['sales_unit_id'], $_POST['date'], $uploadFile);
+                $result = $reports_controller->insert_report($_POST['client_id'], $_POST['report'], $_POST['user_id'], $_POST['sales_unit_id'], $dateSubmitted, $uploadFile);
                 if ($result) {
                     if (isset($_FILES['file'])) {
                         if (!move_uploaded_file($_FILES['file']['tmp_name'], $uploadFile)) {

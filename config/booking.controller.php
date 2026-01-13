@@ -58,7 +58,7 @@ class BookingController extends Controller
 
     public function get_pre_bookings()
     {
-        $this->setStatement("SELECT tb.ID, sb.ID as booking_id, tb.area, address, sb.site_rental, facing, sb.date_from, sb.date_to, sb.client, sb.account_executive, sb.srp, sb.monthly_rate, sb.booking_status, sb.remarks FROM temp_bookings tb JOIN site_bookings sb ON tb.booking_id = sb.ID WHERE sb.site_code = '---' OR (sb.booking_status = 'CANCELLED' AND DATE(sb.created_at) <> DATE(sb.modified_at));");
+        $this->setStatement("SELECT tb.ID, sb.ID as booking_id, tb.area, tb.size, address, sb.site_rental, facing, sb.date_from, sb.date_to, sb.client, sb.account_executive, sb.srp, sb.monthly_rate, sb.booking_status, sb.remarks FROM temp_bookings tb JOIN site_bookings sb ON tb.booking_id = sb.ID WHERE sb.site_code = '---' OR (sb.booking_status = 'CANCELLED' AND DATE(sb.created_at) <> DATE(sb.modified_at));");
         $this->statement->execute();
         return $this->statement->fetchAll();
     }
@@ -99,11 +99,18 @@ class BookingController extends Controller
         return $this->statement->rowCount() > 0;
     }
 
-    public function tag_pre_site_booking($booking_id, $site_code)
+    public function get_pre_site_booking($booking_id)
     {
-        $query = "UPDATE site_bookings SET site_code = ? WHERE ID = ?";
+        $this->setStatement("SELECT  tb.address, tb.size, tb.facing, sb.booking_status, sb.client, sb.old_client, sb.account_executive, CONCAT( TIMESTAMPDIFF(MONTH, sb.date_from, DATE_ADD(sb.date_to, INTERVAL 1 DAY)), 'mo/s (', DATE_FORMAT(sb.date_from, '%b %d'), ' - ', DATE_FORMAT(sb.date_to, '%b %d, %Y'), ')' ) AS term_duration,FORMAT(sb.site_rental,2) as site_rental, FORMAT(sb.srp,2) as srp,FORMAT(sb.monthly_rate,2) as monthly_rate, sb.remarks FROM site_bookings sb JOIN temp_bookings tb ON tb.booking_id = sb.ID WHERE sb.ID = ?;");
+        $this->statement->execute([$booking_id]);
+        return $this->statement->fetch();
+    }
+
+    public function update_pre_site_booking($area, $address, $facing, $size, $booking_id)
+    {
+        $query = "UPDATE temp_bookings SET area = ?, address = ?, facing = ?, size = ? WHERE ID = ?";
         $this->setStatement($query);
-        return $this->statement->execute([$site_code, $booking_id]);
+        return $this->statement->execute([$area, $address, $facing, $size, $booking_id]);
     }
 
     public function update_booking($booking_id, $monthly_rate, $booking_status, $date_from, $date_to, $remarks, $modified_at)

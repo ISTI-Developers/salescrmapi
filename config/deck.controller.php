@@ -19,7 +19,7 @@ class DeckController extends Controller
         if (!$deck_id) {
             return false;
         }
-        $query = "SELECT * FROM decks WHERE ID = ?;";
+        $query = "SELECT * FROM decks WHERE token = ?;";
         $this->setStatement($query);
         $this->statement->execute([$deck_id]);
         return $this->statement->fetch();
@@ -27,10 +27,20 @@ class DeckController extends Controller
     public function update_deck($deck)
     {
         extract($deck);
-
-        $query = "UPDATE decks SET title = ?, description = ?, thumbnail = ?, filters = ?, options = ? WHERE ID = ?";
+        $query = "INSERT INTO decks (user_id, token, title, description, thumbnail,sites, filters, options, status, modified_at)
+            VALUES (?,?,?,?,?,?,?,?,?,?)
+            ON DUPLICATE KEY UPDATE 
+            title = VALUES(title),
+            description = VALUES(description),
+            thumbnail = VALUES(thumbnail),
+            sites = VALUES(sites),
+            filters = VALUES(filters),
+            options = VALUES(options),
+            status = VALUES(status),
+            modified_at = VALUES(modified_at);";
+        // $query = "UPDATE decks SET title = ?, description = ?, thumbnail = ?, sites = ?, filters = ?, options = ?, modified_at = ? WHERE ID = ?";
         $this->setStatement($query);
-        return $this->statement->execute([$title, $description, $thumbnail, $filters, $options, $ID]);
+        return $this->statement->execute([$user_id, $token, $title, $description, $thumbnail, json_encode($sites), json_encode($filters), json_encode($options), 1, $modified_at]);
     }
     public function delete_deck($deck_id)
     {

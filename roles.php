@@ -117,7 +117,7 @@ try {
                     // var_dump($data);
                     if ($role_controller->update_role($role_id, $name, $description)) {
                         $role_permissions = $role_controller->get_role_permissions($role_id);
-                        $existing_permissions = $role_permissions[0]->permissions ?? []; // assuming it's an array
+                        $existing_permissions = array_map(fn($item) => $item->permission, $role_permissions);
 
                         // Normalize to arrays for comparison
                         $existing = is_array($existing_permissions) ? $existing_permissions : [];
@@ -127,6 +127,11 @@ try {
                         $to_add = array_diff($new, $existing);
                         $to_remove = array_diff($existing, $new);
 
+                        // var_dump($existing);
+                        // var_dump($new);
+
+                        // var_dump($to_add);
+                        // var_dump($to_remove);
                         // Add new permissions
                         foreach ($to_add as $permission) {
                             $result = $role_controller->insert_role_permission($role_id, $permission);

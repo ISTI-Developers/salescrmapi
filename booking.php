@@ -92,7 +92,7 @@ try {
                 ];
             } else {
                 $recipients = $booking_controller->get_emails("individual");
-                // $emails = array_column($recipients, 'name', index_key: 'email');
+                $emails = array_column($recipients, 'name', index_key: 'email');
             }
             if ($response = $booking_controller->sendMail("BILLBOARD BOOKINGS, Etc.", $message, $emails, 'Sales Team')) {
                 header("Cache-Control: no-store, no-cache, must-revalidate, max-age=0");
@@ -114,7 +114,7 @@ try {
                 throw new Exception('Data not found.');
             }
             extract($data);
-            if ($action === "update") {
+            if (isset($action) && $action === "update") {
                 $result = $booking_controller->update_booking($booking_id, $monthly_rate, $booking_status, $date_from, $date_to, $remarks, $modified_at);
                 $booking = (array) $booking_controller->get_booking_for_notification($booking_id);
                 extract($booking);
@@ -158,7 +158,51 @@ try {
                     throw new Exception("Error in sending the notification. Please contact the developer.");
                 }
             } else {
-                $result = $booking_controller->tag_pre_site_booking($id, $site_code);
+                $result = $booking_controller->update_pre_site_booking($area, $address, $facing, $size, $id);
+                if ($result) {
+                    $result = $booking_controller->update_booking($booking_id, $monthly_rate, $booking_status, $start, $end, $remarks, $modified_at);
+
+                    if ($result) {
+                        $result = (array) $booking_controller->get_pre_site_booking($booking_id);
+                        extract($result);
+
+                        $message = file_get_contents("./email_templates/booking_update_no_site.php");
+                        $message = str_replace("[today]", date("M d, Y"), $message);
+                        $message = str_replace("[address]", $address, $message);
+                        $message = str_replace("[size]", $size, $message);
+                        $message = str_replace("[facing]", $facing, $message);
+                        $message = str_replace("[status]", $booking_status, $message);
+                        $message = str_replace("[client]", $client, $message);
+                        $message = str_replace("[ae]", $account_executive, $message);
+                        $message = str_replace("[term_duration]", $term_duration, $message);
+                        $message = str_replace("[site_rental]", $site_rental, $message);
+                        $message = str_replace("[srp]", $srp, $message);
+                        $message = str_replace("[monthly_rate]", $monthly_rate, $message);
+                        $message = str_replace("[remarks]", $remarks, $message);
+
+                        if (ENV_MODE === "DEV") {
+                            $emails = [
+                                "vrinoza@unmg.com.ph" => "Vincent Kyle Rinoza",
+                                // "fdolar@unitedneon.com" => "Ferlie Dolar"
+                            ];
+                        } else {
+                            $recipients = $booking_controller->get_emails("individual");
+                            $emails = array_column($recipients, 'name', index_key: 'email');
+                        }
+                        if ($response = $booking_controller->sendMail("BILLBOARD BOOKINGS, Etc.", $message, $emails, 'Sales Team')) {
+                            header("Cache-Control: no-store, no-cache, must-revalidate, max-age=0");
+                            header("Pragma: no-cache");
+                            header("Expires: 0");
+                            echo json_encode([
+                                "acknowledged" => true,
+                                "id" => $booking_id
+                            ]);
+                            exit;
+                        } else {
+                            throw new Exception("Error in sending the notification. Please contact the developer.");
+                        }
+                    }
+                }
             }
             echo json_encode([
                 "acknowledged" => $result
@@ -214,7 +258,7 @@ try {
                             ];
                         } else {
                             $recipients = $booking_controller->get_emails("individual");
-                            // $emails = array_column($recipients, 'name', index_key: 'email');
+                            $emails = array_column($recipients, 'name', index_key: 'email');
                         }
 
                         if ($response = $booking_controller->sendMail("BILLBOARD BOOKINGS, Etc.", $message, $emails, 'Sales Team', true)) {
