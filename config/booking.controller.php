@@ -85,8 +85,8 @@ class BookingController extends Controller
 
     public function get_emails($remarks)
     {
-        $this->setStatement("SELECT * FROM email_recipients WHERE remarks = ? AND status <> 2");
-        $this->statement->execute([$remarks]);
+        $this->setStatement("SELECT * FROM email_recipients WHERE remarks IN ({$remarks}) AND status <> 2");
+        $this->statement->execute([]);
         return $this->statement->fetchAll();
     }
 

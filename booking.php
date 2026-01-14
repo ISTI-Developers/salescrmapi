@@ -91,7 +91,7 @@ try {
                     // "fdolar@unitedneon.com" => "Ferlie Dolar"
                 ];
             } else {
-                $recipients = $booking_controller->get_emails("individual");
+                $recipients = $booking_controller->get_emails(`"individual, "ops"`);
                 $emails = array_column($recipients, 'name', index_key: 'email');
             }
             if ($response = $booking_controller->sendMail("BILLBOARD BOOKINGS, Etc.", $message, $emails, 'Sales Team')) {
@@ -186,7 +186,7 @@ try {
                                 // "fdolar@unitedneon.com" => "Ferlie Dolar"
                             ];
                         } else {
-                            $recipients = $booking_controller->get_emails("individual");
+                            $recipients = $booking_controller->get_emails(`"individual, "ops"`);
                             $emails = array_column($recipients, 'name', index_key: 'email');
                         }
                         if ($response = $booking_controller->sendMail("BILLBOARD BOOKINGS, Etc.", $message, $emails, 'Sales Team')) {
@@ -257,7 +257,7 @@ try {
                                 // "fdolar@unitedneon.com" => "Ferlie Dolar"
                             ];
                         } else {
-                            $recipients = $booking_controller->get_emails("individual");
+                            $recipients = $booking_controller->get_emails(`"individual, "ops"`);
                             $emails = array_column($recipients, 'name', index_key: 'email');
                         }
 
