@@ -10,8 +10,11 @@ class DeckController extends Controller
             return false;
         }
         $query = "SELECT * FROM decks WHERE user_id = ? AND status <> 5;";
+        if ($user_id === 1) {
+            $query = "SELECT * FROM decks WHERE status <> 5";
+        }
         $this->setStatement($query);
-        $this->statement->execute([$user_id]);
+        $this->statement->execute($user_id !== 1 ? [$user_id] : []);
         return $this->statement->fetchAll();
     }
     public function get_deck($deck_id)

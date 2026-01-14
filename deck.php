@@ -56,6 +56,17 @@ try {
             ]);
             break;
         case "DELETE":
+            if (!isset($_GET['id'])) {
+                throw new Exception("ID not found.");
+            }
+
+            $results = $deck_controller->delete_deck($_GET['id']);
+            header("Cache-Control: no-store, no-cache, must-revalidate, max-age=0");
+            header("Pragma: no-cache");
+            header("Expires: 0");
+            echo json_encode([
+                "acknowledged" => $results
+            ]);
 
     }
 } catch (Exception $e) {
