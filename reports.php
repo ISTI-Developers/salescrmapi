@@ -18,7 +18,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'OPTIONS') {
 $reports_controller = new ReportsController();
 
 try {
-    // validate_bearer_token();
+    validate_bearer_token();
 
     switch ($_SERVER['REQUEST_METHOD']) {
         case "GET":
